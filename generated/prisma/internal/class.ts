@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.10.0",
   "engineVersion": "0edf323efd1d98336f3f0a68684b56f689b900d3",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nenum DeploymentStatus {\n  NOT_STARTED\n  QUEUED\n  IN_PROGRESS\n  READY\n  FAIL\n}\n\nmodel Project {\n  id           String  @id @default(uuid())\n  name         String\n  gitURL       String  @map(\"git_url\")\n  subDomain    String  @map(\"subdomain\")\n  customDomain String? @map(\"custom_domain\")\n\n  Deployment Deployment[]\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n}\n\nmodel Deployment {\n  id String @id @default(uuid())\n\n  projectId String  @map(\"project_id\")\n  project   Project @relation(fields: [projectId], references: [id])\n\n  status DeploymentStatus @default(NOT_STARTED)\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -32,10 +32,10 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Project\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"gitURL\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"git_url\"},{\"name\":\"subDomain\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"subdomain\"},{\"name\":\"customDomain\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"custom_domain\"},{\"name\":\"Deployment\",\"kind\":\"object\",\"type\":\"Deployment\",\"relationName\":\"DeploymentToProject\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"}],\"dbName\":null,\"schema\":null},\"Deployment\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"projectId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"project_id\"},{\"name\":\"project\",\"kind\":\"object\",\"type\":\"Project\",\"relationName\":\"DeploymentToProject\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"DeploymentStatus\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null,\"schema\":null}},\"enums\":{},\"types\":{}}")
 config.parameterizationSchema = {
-  strings: JSON.parse("[]"),
-  graph: "AAAA"
+  strings: JSON.parse("[\"where\",\"orderBy\",\"cursor\",\"project\",\"Deployment\",\"_count\",\"Project.findUnique\",\"Project.findUniqueOrThrow\",\"Project.findFirst\",\"Project.findFirstOrThrow\",\"Project.findMany\",\"data\",\"Project.createOne\",\"Project.createMany\",\"Project.createManyAndReturn\",\"Project.updateOne\",\"Project.updateMany\",\"Project.updateManyAndReturn\",\"create\",\"update\",\"Project.upsertOne\",\"Project.deleteOne\",\"Project.deleteMany\",\"having\",\"_min\",\"_max\",\"Project.groupBy\",\"Project.aggregate\",\"Deployment.findUnique\",\"Deployment.findUniqueOrThrow\",\"Deployment.findFirst\",\"Deployment.findFirstOrThrow\",\"Deployment.findMany\",\"Deployment.createOne\",\"Deployment.createMany\",\"Deployment.createManyAndReturn\",\"Deployment.updateOne\",\"Deployment.updateMany\",\"Deployment.updateManyAndReturn\",\"Deployment.upsertOne\",\"Deployment.deleteOne\",\"Deployment.deleteMany\",\"Deployment.groupBy\",\"Deployment.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"projectId\",\"DeploymentStatus\",\"status\",\"createdAt\",\"updatedAt\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"name\",\"gitURL\",\"subDomain\",\"customDomain\",\"every\",\"some\",\"none\",\"is\",\"isNot\",\"connectOrCreate\",\"upsert\",\"createMany\",\"set\",\"disconnect\",\"delete\",\"connect\",\"updateMany\",\"deleteMany\"]"),
+  graph: "bxIgCwQAAEkAICwAAEUAMC0AAAkAEC4AAEUAMC8BAAAAATNAAEgAITRAAEgAIUABAEYAIUEBAEYAIUIBAEYAIUMBAEcAIQEAAAABACAJAwAATAAgLAAASgAwLQAAAwAQLgAASgAwLwEARgAhMAEARgAhMgAASzIiM0AASAAhNEAASAAhAQMAAGkAIAkDAABMACAsAABKADAtAAADABAuAABKADAvAQAAAAEwAQBGACEyAABLMiIzQABIACE0QABIACEDAAAAAwAgAQAABAAwAgAABQAgAQAAAAMAIAEAAAABACALBAAASQAgLAAARQAwLQAACQAQLgAARQAwLwEARgAhM0AASAAhNEAASAAhQAEARgAhQQEARgAhQgEARgAhQwEARwAhAgQAAGgAIEMAAFUAIAMAAAAJACABAAAKADACAAABACADAAAACQAgAQAACgAwAgAAAQAgAwAAAAkAIAEAAAoAMAIAAAEAIAgEAABnACAvAQAAAAEzQAAAAAE0QAAAAAFAAQAAAAFBAQAAAAFCAQAAAAFDAQAAAAEBCwAADgAgBy8BAAAAATNAAAAAATRAAAAAAUABAAAAAUEBAAAAAUIBAAAAAUMBAAAAAQELAAAQADABCwAAEAAwCAQAAFoAIC8BAFAAITNAAFIAITRAAFIAIUABAFAAIUEBAFAAIUIBAFAAIUMBAFkAIQIAAAABACALAAATACAHLwEAUAAhM0AAUgAhNEAAUgAhQAEAUAAhQQEAUAAhQgEAUAAhQwEAWQAhAgAAAAkAIAsAABUAIAIAAAAJACALAAAVACADAAAAAQAgEgAADgAgEwAAEwAgAQAAAAEAIAEAAAAJACAEBQAAVgAgGAAAWAAgGQAAVwAgQwAAVQAgCiwAAEAAMC0AABwAEC4AAEAAMC8BADYAITNAADgAITRAADgAIUABADYAIUEBADYAIUIBADYAIUMBAEEAIQMAAAAJACABAAAbADAXAAAcACADAAAACQAgAQAACgAwAgAAAQAgAQAAAAUAIAEAAAAFACADAAAAAwAgAQAABAAwAgAABQAgAwAAAAMAIAEAAAQAMAIAAAUAIAMAAAADACABAAAEADACAAAFACAGAwAAVAAgLwEAAAABMAEAAAABMgAAADICM0AAAAABNEAAAAABAQsAACQAIAUvAQAAAAEwAQAAAAEyAAAAMgIzQAAAAAE0QAAAAAEBCwAAJgAwAQsAACYAMAYDAABTACAvAQBQACEwAQBQACEyAABRMiIzQABSACE0QABSACECAAAABQAgCwAAKQAgBS8BAFAAITABAFAAITIAAFEyIjNAAFIAITRAAFIAIQIAAAADACALAAArACACAAAAAwAgCwAAKwAgAwAAAAUAIBIAACQAIBMAACkAIAEAAAAFACABAAAAAwAgAwUAAE0AIBgAAE8AIBkAAE4AIAgsAAA1ADAtAAAyABAuAAA1ADAvAQA2ACEwAQA2ACEyAAA3MiIzQAA4ACE0QAA4ACEDAAAAAwAgAQAAMQAwFwAAMgAgAwAAAAMAIAEAAAQAMAIAAAUAIAgsAAA1ADAtAAAyABAuAAA1ADAvAQA2ACEwAQA2ACEyAAA3MiIzQAA4ACE0QAA4ACEOBQAAOgAgGAAAPwAgGQAAPwAgNQEAAAABNgEAAAAENwEAAAAEOAEAAAABOQEAAAABOgEAAAABOwEAAAABPAEAPgAhPQEAAAABPgEAAAABPwEAAAABBwUAADoAIBgAAD0AIBkAAD0AIDUAAAAyAjYAAAAyCDcAAAAyCDwAADwyIgsFAAA6ACAYAAA7ACAZAAA7ACA1QAAAAAE2QAAAAAQ3QAAAAAQ4QAAAAAE5QAAAAAE6QAAAAAE7QAAAAAE8QAA5ACELBQAAOgAgGAAAOwAgGQAAOwAgNUAAAAABNkAAAAAEN0AAAAAEOEAAAAABOUAAAAABOkAAAAABO0AAAAABPEAAOQAhCDUCAAAAATYCAAAABDcCAAAABDgCAAAAATkCAAAAAToCAAAAATsCAAAAATwCADoAIQg1QAAAAAE2QAAAAAQ3QAAAAAQ4QAAAAAE5QAAAAAE6QAAAAAE7QAAAAAE8QAA7ACEHBQAAOgAgGAAAPQAgGQAAPQAgNQAAADICNgAAADIINwAAADIIPAAAPDIiBDUAAAAyAjYAAAAyCDcAAAAyCDwAAD0yIg4FAAA6ACAYAAA_ACAZAAA_ACA1AQAAAAE2AQAAAAQ3AQAAAAQ4AQAAAAE5AQAAAAE6AQAAAAE7AQAAAAE8AQA-ACE9AQAAAAE-AQAAAAE_AQAAAAELNQEAAAABNgEAAAAENwEAAAAEOAEAAAABOQEAAAABOgEAAAABOwEAAAABPAEAPwAhPQEAAAABPgEAAAABPwEAAAABCiwAAEAAMC0AABwAEC4AAEAAMC8BADYAITNAADgAITRAADgAIUABADYAIUEBADYAIUIBADYAIUMBAEEAIQ4FAABDACAYAABEACAZAABEACA1AQAAAAE2AQAAAAU3AQAAAAU4AQAAAAE5AQAAAAE6AQAAAAE7AQAAAAE8AQBCACE9AQAAAAE-AQAAAAE_AQAAAAEOBQAAQwAgGAAARAAgGQAARAAgNQEAAAABNgEAAAAFNwEAAAAFOAEAAAABOQEAAAABOgEAAAABOwEAAAABPAEAQgAhPQEAAAABPgEAAAABPwEAAAABCDUCAAAAATYCAAAABTcCAAAABTgCAAAAATkCAAAAAToCAAAAATsCAAAAATwCAEMAIQs1AQAAAAE2AQAAAAU3AQAAAAU4AQAAAAE5AQAAAAE6AQAAAAE7AQAAAAE8AQBEACE9AQAAAAE-AQAAAAE_AQAAAAELBAAASQAgLAAARQAwLQAACQAQLgAARQAwLwEARgAhM0AASAAhNEAASAAhQAEARgAhQQEARgAhQgEARgAhQwEARwAhCzUBAAAAATYBAAAABDcBAAAABDgBAAAAATkBAAAAAToBAAAAATsBAAAAATwBAD8AIT0BAAAAAT4BAAAAAT8BAAAAAQs1AQAAAAE2AQAAAAU3AQAAAAU4AQAAAAE5AQAAAAE6AQAAAAE7AQAAAAE8AQBEACE9AQAAAAE-AQAAAAE_AQAAAAEINUAAAAABNkAAAAAEN0AAAAAEOEAAAAABOUAAAAABOkAAAAABO0AAAAABPEAAOwAhA0QAAAMAIEUAAAMAIEYAAAMAIAkDAABMACAsAABKADAtAAADABAuAABKADAvAQBGACEwAQBGACEyAABLMiIzQABIACE0QABIACEENQAAADICNgAAADIINwAAADIIPAAAPTIiDQQAAEkAICwAAEUAMC0AAAkAEC4AAEUAMC8BAEYAITNAAEgAITRAAEgAIUABAEYAIUEBAEYAIUIBAEYAIUMBAEcAIUcAAAkAIEgAAAkAIAAAAAFMAQAAAAEBTAAAADICAUxAAAAAAQUSAABrACATAABuACBJAABsACBKAABtACBPAAABACADEgAAawAgSQAAbAAgTwAAAQAgAAAAAAFMAQAAAAELEgAAWwAwEwAAYAAwSQAAXAAwSgAAXQAwSwAAXgAgTAAAXwAwTQAAXwAwTgAAXwAwTwAAXwAwUAAAYQAwUQAAYgAwBC8BAAAAATIAAAAyAjNAAAAAATRAAAAAAQIAAAAFACASAABmACADAAAABQAgEgAAZgAgEwAAZQAgAQsAAGoAMAkDAABMACAsAABKADAtAAADABAuAABKADAvAQAAAAEwAQBGACEyAABLMiIzQABIACE0QABIACECAAAABQAgCwAAZQAgAgAAAGMAIAsAAGQAIAgsAABiADAtAABjABAuAABiADAvAQBGACEwAQBGACEyAABLMiIzQABIACE0QABIACEILAAAYgAwLQAAYwAQLgAAYgAwLwEARgAhMAEARgAhMgAASzIiM0AASAAhNEAASAAhBC8BAFAAITIAAFEyIjNAAFIAITRAAFIAIQQvAQBQACEyAABRMiIzQABSACE0QABSACEELwEAAAABMgAAADICM0AAAAABNEAAAAABBBIAAFsAMEkAAFwAMEsAAF4AIE8AAF8AMAACBAAAaAAgQwAAVQAgBC8BAAAAATIAAAAyAjNAAAAAATRAAAAAAQcvAQAAAAEzQAAAAAE0QAAAAAFAAQAAAAFBAQAAAAFCAQAAAAFDAQAAAAECAAAAAQAgEgAAawAgAwAAAAkAIBIAAGsAIBMAAG8AIAkAAAAJACALAABvACAvAQBQACEzQABSACE0QABSACFAAQBQACFBAQBQACFCAQBQACFDAQBZACEHLwEAUAAhM0AAUgAhNEAAUgAhQAEAUAAhQQEAUAAhQgEAUAAhQwEAWQAhAgQGAgUAAwEDAAEBBAcAAAAAAwUACBgACRkACgAAAAMFAAgYAAkZAAoBAwABAQMAAQMFAA8YABAZABEAAAADBQAPGAAQGQARBgIBBwgBCAsBCQwBCg0BDA8BDREEDhIFDxQBEBYEERcGFBgBFRkBFhoEGh0HGx4LHB8CHSACHiECHyICICMCISUCIicEIygMJCoCJSwEJi0NJy4CKC8CKTAEKjMOKzQS"
 }
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
@@ -70,8 +70,8 @@ export interface PrismaClientConstructor {
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more Users
-   * const users = await prisma.user.findMany()
+   * // Fetch zero or more Projects
+   * const projects = await prisma.project.findMany()
    * ```
    * 
    * Read more in our [docs](https://pris.ly/d/client).
@@ -94,8 +94,8 @@ export interface PrismaClientConstructor {
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Projects
+ * const projects = await prisma.project.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -188,7 +188,25 @@ export interface PrismaClient<
     extArgs: ExtArgs
   }>>
 
-    
+      /**
+   * `prisma.project`: Exposes CRUD operations for the **Project** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Projects
+    * const projects = await prisma.project.findMany()
+    * ```
+    */
+  get project(): Prisma.ProjectDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.deployment`: Exposes CRUD operations for the **Deployment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Deployments
+    * const deployments = await prisma.deployment.findMany()
+    * ```
+    */
+  get deployment(): Prisma.DeploymentDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
 export function getPrismaClientClass(): PrismaClientConstructor {

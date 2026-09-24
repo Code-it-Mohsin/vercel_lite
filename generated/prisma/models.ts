@@ -8,4 +8,6 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Project.ts'
+export type * from './models/Deployment.ts'
 export type * from './commonInputTypes.ts'
