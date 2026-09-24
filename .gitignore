@@ -1,0 +1,4 @@
+.env
+.env*
+ca.pem
+node_modules
