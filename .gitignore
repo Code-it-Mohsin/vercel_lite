@@ -1,4 +1,6 @@
 .env
 .env*
 ca.pem
+kafka.pem
+*.pem
 node_modules

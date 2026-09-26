@@ -12,7 +12,8 @@ import { PrismaClient } from "./generated/client/client.js"
 import mongoose from 'mongoose'
 import dns from "node:dns";
 
-import {Kafka} from 'kafkajs'
+import { Kafka } from 'kafkajs'
+import { ECSClient, RunTaskCommand } from '@aws-sdk/client-ecs'
 
 // DNS CONFIG TO LOOKUP SRV RECORDS
 dns.setServers([
@@ -20,12 +21,13 @@ dns.setServers([
   "8.8.8.8",
 ]);
 
+
 // EXPRESS
 const app = express()
 const PORT = process.env.PORT || 8000
 
-// HTTP AND SOCKET.IO
 
+// HTTP AND SOCKET.IO
 const httpServer = createServer(app)
 const io = new Server(httpServer)
 
@@ -33,6 +35,7 @@ io.on("connection", (Socket) => {
   console.log('a user has connected')
   // join the client to the corresponding deployment room
 })
+
 
 // INITIALIZE PRISMA CLIENT
 const adapter = new PrismaPg({
@@ -43,18 +46,16 @@ const adapter = new PrismaPg({
 })
 export const prisma = new PrismaClient({ adapter })
 
+
 // CONNECT TO MONGODB
 mongoose.connect(process.env.MONGODB_URI!)
 .then(() => console.log(`Connected to Mongodb Atlas... logs db`))
 .catch((error) => console.error(error));
 
 
-const PROJECT_ID = process.env.PROJECT_ID
-const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID
-
 // INITIALIZE KAFKA
 const kafka = new Kafka({
-  clientId: `docker-server-${DEPLOYMENT_ID}`,
+  clientId: 'api-server',
   brokers: [process.env.KAFKA_SERVICE_URI!],
   ssl: {
     ca: [readFileSync(new URL ('./kafka.pem', import.meta.url), 'utf-8')],
@@ -66,31 +67,57 @@ const kafka = new Kafka({
   },
 })
 
+
 // INITIALIZE KAFKA CONSUMER
-// const kafkaConsumer = kafka.consumer({
+const kafkaConsumer = kafka.consumer({groupId: "vercel-lite-log-consumers"})
 
-// })
 
-// NEW ECS CLIENT 
+// AWS ECS CLIENT 
+
+const ecsClient = new ECSClient({
+  region: 'eu-north-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+  }
+})
 
 const config = {
   CLUSTER: '',
   TASK: ''
 }
 
+// MIDDLEWARES
 app.use(express.json())
 app.use(cors())
 
+
 // POST ROUTE TO /project
+app.post('/project', (req, res) => {
+
+})
+
 
 // POST ROUTE TO /deploy
+app.post('/deploy', (req, res) => {
+  
+})
+
 
 // GET ROUTE TO /logs/:id
+app.get('/logs/:id', (req, res) => {
 
-// initkafkaConsumer function
+})
+
+
+// initkafkaConsumer
+function initkafkaConsumer(){
+
+}
+// initkafkaConsumer()
+
 
 httpServer.listen(PORT, () => console.log(`Http server istening on ${PORT}`))
-
 
 /*
 API server
