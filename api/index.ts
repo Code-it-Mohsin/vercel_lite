@@ -2,6 +2,8 @@ import "dotenv/config"
 
 import express from 'express'
 import cors from 'cors'
+import {z} from 'zod'
+import {generateSlug} from 'random-word-slugs'
 
 import { createServer } from "node:http"
 import { Server } from 'socket.io'
@@ -14,6 +16,7 @@ import dns from "node:dns";
 
 import { Kafka } from 'kafkajs'
 import { ECSClient, RunTaskCommand } from '@aws-sdk/client-ecs'
+import { error } from "node:console"
 
 // DNS CONFIG TO LOOKUP SRV RECORDS
 dns.setServers([
@@ -83,8 +86,8 @@ const ecsClient = new ECSClient({
 })
 
 const config = {
-  CLUSTER: '',
-  TASK: ''
+  CLUSTER: process.env.AWS_CLUSTER,
+  TASK: process.env.AWS_TASK
 }
 
 // MIDDLEWARES
@@ -93,26 +96,65 @@ app.use(cors())
 
 
 // POST ROUTE TO /project
-app.post('/project', (req, res) => {
 
+app.post('/project', async (req, res) => {
+
+// Validate the data provided with zod, as typescript types can help in development but on server ts is gone..
+  const zodSchema = z.object({
+    name: z.string(),
+    gitURL: z.string()
+  })
+  const safeParseResult = zodSchema.safeParse(req.body)
+
+  if(safeParseResult.error) return res.status(400).json({error: safeParseResult.error})
+
+  const {name, gitURL} = safeParseResult.data
+  const project = await prisma.project.create({
+    data: {
+      name,
+      gitURL,
+      subDomain: generateSlug()
+    }
+  })
+
+// Create a project in the projects column
+// generate a subdomain
 })
 
 
 // POST ROUTE TO /deploy
+
 app.post('/deploy', (req, res) => {
-  
+
+  // /project creates a project in Prisma, so on /deploy the project Id is passed
+  // find that project in prisma
+  // create a deployment row in primsa
+
+  //Spin the container
+  // see the AWS doc for RunTaskCommand
+   
+  // send command via ecsCllient
+  // return a json response with status and data conatining deploymentId 
+
 })
 
 
 // GET ROUTE TO /logs/:id
 app.get('/logs/:id', (req, res) => {
+  // get deploymentId from params
+  // do a mongo query to retrieve the stored logs
+  // return those logs
 
 })
 
 
 // initkafkaConsumer
 function initkafkaConsumer(){
+  // connect to the consumer
+  // subscribe to the topic, fromBeginning
 
+  // run the consumer
+    // each 
 }
 // initkafkaConsumer()
 
